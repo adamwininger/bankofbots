@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bank of the Bots — A Bank Built for Machines</title>
+<meta name="description" content="The world's first bank built for bots. Accounts, payments, and credit for autonomous AI agents.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#08080A;--bg2:#0C0D10;--surface:#111114;--surface2:#18181C;
+  --border:#1E1E26;
+  --text:#F5F5F7;--text-dim:#6E6E78;--text-mid:#9A9AA8;
+  --purple:#8B5CF6;--purple-light:#A78BFA;--purple-glow:rgba(139,92,246,.12);
+  --accent:#00F0FF;--accent-green:#00FF94;--human-amber:#FBBF24;
+  --gradient-brand:linear-gradient(135deg,#8B5CF6,#A78BFA);
+  --gradient-accent:linear-gradient(135deg,#00F0FF,#00FF94);
+  --px:clamp(1.5rem,5vw,4.5rem);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:var(--purple);color:#fff}
+
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(139,92,246,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,.025) 1px,transparent 1px);
+  background-size:72px 72px;
+  mask-image:radial-gradient(ellipse 80% 50% at 50% 25%,#000 20%,transparent 70%)}
+.glow-orb{position:fixed;border-radius:50%;opacity:.025;filter:blur(150px);pointer-events:none;z-index:0;will-change:transform}
+.orb1{width:900px;height:900px;top:-400px;left:-300px;background:radial-gradient(circle,var(--purple) 0%,transparent 70%)}
+.orb2{width:800px;height:800px;bottom:-400px;right:-300px;background:radial-gradient(circle,var(--accent) 0%,transparent 70%)}
+.particle{position:fixed;width:2px;height:2px;background:var(--purple-light);border-radius:50%;opacity:0;pointer-events:none;z-index:0;animation:pf linear infinite}
+@keyframes pf{0%{opacity:0;transform:translateY(100vh)}10%{opacity:.2}90%{opacity:.2}100%{opacity:0;transform:translateY(-10vh)}}
+
+/* BOB */
+.bob-sm{width:28px;height:28px;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bob-sm .circ{width:20px;height:20px;background:var(--purple);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;position:relative}
+.bob-sm .bt{font-family:'Sora',sans-serif;font-size:6.5px;font-weight:800;color:#fff;letter-spacing:-.3px}
+.bob-sm .orb{position:absolute;width:28px;height:28px;border:1px dashed rgba(139,92,246,.3);border-radius:50%;animation:os 12s linear infinite;z-index:3}
+.bob-sm .claw{position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:8px;height:8px;filter:drop-shadow(0 0 2px rgba(139,92,246,.5))}
+.bob-xs{width:20px;height:20px;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bob-xs .circ{width:14px;height:14px;background:var(--purple);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;position:relative}
+.bob-xs .bt{font-family:'Sora',sans-serif;font-size:4.5px;font-weight:800;color:#fff;letter-spacing:-.2px}
+.bob-xs .orb{position:absolute;width:20px;height:20px;border:1px dashed rgba(139,92,246,.3);border-radius:50%;animation:os 12s linear infinite;z-index:3}
+.bob-xs .claw{position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:6px;height:6px}
+@keyframes os{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.csv{display:block;width:100%;height:100%}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 var(--px);height:52px;display:flex;align-items:center;justify-content:space-between;background:rgba(8,8,10,.35);backdrop-filter:blur(30px) saturate(1.4);border-bottom:1px solid transparent;transition:all .4s}
+nav.scrolled{background:rgba(8,8,10,.92);border-bottom-color:var(--border)}
+.nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--text)}
+.nav-brand{font-family:'Sora',sans-serif;font-weight:700;font-size:.88rem;letter-spacing:-.3px}
+.nav-r{display:flex;align-items:center}
+.nl{color:var(--text-dim);text-decoration:none;font-family:'Space Mono',monospace;font-size:.55rem;font-weight:400;letter-spacing:2px;text-transform:uppercase;transition:color .3s;padding:.5rem .85rem}
+.nl:hover,.nl.active{color:var(--purple-light)}
+.nc{margin-left:.35rem;padding:.4rem .95rem;border:1px solid var(--purple);color:var(--purple-light);font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:2px;text-transform:uppercase;border-radius:4px;transition:all .3s;text-decoration:none;background:transparent}
+.nc:hover{background:var(--purple);color:#fff}
+.mm{display:none;background:none;border:none;color:var(--text);font-size:1.2rem;cursor:pointer;padding:.5rem}
+
+/* ===== HERO ===== */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4rem var(--px) .5rem;text-align:center;position:relative;z-index:1}
+.hero-badge{display:inline-flex;align-items:center;gap:.45rem;padding:.25rem .75rem;border:1px solid var(--border);border-radius:100px;font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem;animation:fu .6s ease both}
+.hero-badge .pulse{width:5px;height:5px;border-radius:50%;background:var(--accent-green);animation:pd 2s ease infinite}
+@keyframes pd{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,148,.4)}50%{opacity:.6;box-shadow:0 0 0 5px rgba(0,255,148,0)}}
+
+.hero h1{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(2.5rem,8.5vw,7.5rem);line-height:.9;letter-spacing:-.05em;width:100%;animation:fu .6s ease .08s both}
+.hero h1 em{font-style:italic;background:var(--gradient-accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+.hero-sub{font-size:clamp(.92rem,1.2vw,1.1rem);color:var(--text-mid);max-width:540px;line-height:1.7;margin-top:1.25rem;animation:fu .6s ease .16s both}
+.hero-sub strong{color:var(--text);font-weight:600}
+
+.hero-ctas{display:flex;gap:.85rem;margin-top:1.75rem;flex-wrap:wrap;justify-content:center;animation:fu .6s ease .24s both}
+.cta-bot,.cta-human{display:flex;align-items:center;gap:.55rem;padding:.7rem 1.5rem;border-radius:9px;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .3s;text-decoration:none;border:1.5px solid transparent}
+.cta-bot{border-color:rgba(139,92,246,.3);color:var(--purple-light);background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(139,92,246,.02))}
+.cta-bot:hover{border-color:var(--purple);transform:translateY(-2px);box-shadow:0 10px 30px rgba(139,92,246,.12)}
+.cta-human{border-color:rgba(251,191,36,.25);color:var(--human-amber);background:linear-gradient(135deg,rgba(251,191,36,.05),rgba(251,191,36,.01))}
+.cta-human:hover{border-color:var(--human-amber);transform:translateY(-2px);box-shadow:0 10px 30px rgba(251,191,36,.08)}
+.cta-emoji{font-size:1rem}
+.cta-text{text-align:left}
+.cta-text small{display:block;font-size:.6rem;font-weight:400;opacity:.55;margin-top:.05rem}
+
+.hero-stats{display:flex;gap:2.5rem;margin-top:1.75rem;animation:fu .6s ease .32s both;flex-wrap:wrap;justify-content:center}
+.stat{text-align:center}
+.stat .num{font-family:'Sora',sans-serif;font-size:1.3rem;font-weight:700;background:var(--gradient-accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat .lbl{font-size:.52rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.15em;margin-top:.05rem;font-weight:500;font-family:'Space Mono',monospace}
+
+@keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== SHARED ===== */
+section{position:relative;z-index:1;padding:2.75rem var(--px)}
+.sl{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--purple-light);margin-bottom:.45rem;font-weight:400;display:block}
+.st{font-family:'Instrument Serif',serif;font-size:clamp(2rem,4.5vw,3.5rem);font-weight:400;letter-spacing:-.03em;line-height:1.05}
+.sd{color:var(--text-mid);font-size:1rem;line-height:1.65;max-width:580px;margin-top:.4rem}
+.cen{text-align:center}
+.cen .sd{margin-inline:auto}
+.sep{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:0 var(--px)}
+
+.bp{padding:.7rem 1.6rem;background:var(--gradient-brand);color:#fff;border:none;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .3s;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem}
+.bp:hover{transform:translateY(-2px);box-shadow:0 6px 22px rgba(139,92,246,.22)}
+.bo{padding:.7rem 1.6rem;background:transparent;color:var(--text-mid);border:1px solid var(--border);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .3s;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem}
+.bo:hover{border-color:var(--purple);color:var(--purple-light);transform:translateY(-2px)}
+
+.reveal{opacity:0;transform:translateY(22px);transition:all .65s cubic-bezier(.22,1,.36,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.rd1{transition-delay:.06s}.rd2{transition-delay:.12s}.rd3{transition-delay:.18s}
+
+/* ===== PROBLEM — bigger numbers, bigger icons ===== */
+.ph{font-family:'Instrument Serif',serif;font-size:clamp(1.3rem,2.8vw,2.1rem);font-weight:400;letter-spacing:-.02em;line-height:1.3;color:var(--text-mid);max-width:780px;margin:0 auto 1.75rem;text-align:center}
+.ph strong{color:var(--text);font-weight:400}
+
+.pg{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;border-radius:12px;overflow:hidden;background:var(--border)}
+.pc{background:var(--surface);padding:2.25rem 1.75rem;position:relative;transition:all .4s}
+.pc:hover{background:var(--surface2)}
+.pc .pn{font-family:'Sora',sans-serif;font-size:5.5rem;font-weight:800;line-height:1;position:absolute;top:.25rem;right:.75rem;opacity:.14;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.04));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.pc .pi{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:.85rem}
+.pc:nth-child(1) .pi{background:rgba(255,77,79,.12);border:1px solid rgba(255,77,79,.08)}
+.pc:nth-child(2) .pi{background:rgba(255,179,71,.12);border:1px solid rgba(255,179,71,.08)}
+.pc:nth-child(3) .pi{background:rgba(255,77,127,.12);border:1px solid rgba(255,77,127,.08)}
+.pc h4{font-family:'Sora',sans-serif;font-size:1.05rem;font-weight:600;margin-bottom:.35rem;line-height:1.3}
+.pc p{font-size:.9rem;color:var(--text-dim);line-height:1.6}
+
+/* ===== MID CTA — BIG, stretched, impactful ===== */
+.mc{text-align:center;padding:3rem 2.5rem;border:1px solid rgba(139,92,246,.1);border-radius:14px;background:linear-gradient(135deg,rgba(139,92,246,.04),rgba(0,240,255,.02))}
+.mc h3{font-family:'Instrument Serif',serif;font-size:clamp(1.6rem,3.8vw,3rem);font-weight:400;margin-bottom:.5rem;line-height:1.1;letter-spacing:-.03em}
+.mc p{color:var(--text-mid);font-size:1.05rem;margin-bottom:1.4rem;line-height:1.6}
+.mcb{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
+
+/* ===== SOLUTION ===== */
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;margin-top:1.75rem}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:2rem 1.6rem;position:relative;overflow:hidden;transition:all .4s}
+.sc:hover{border-color:rgba(139,92,246,.3);transform:translateY(-3px);box-shadow:0 14px 40px rgba(139,92,246,.05)}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gradient-brand);transform:scaleX(0);transition:transform .4s;transform-origin:left}
+.sc:hover::before{transform:scaleX(1)}
+.sc .si{font-size:1.8rem;margin-bottom:.7rem;display:block}
+.sc h3{font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:.4rem}
+.sc p{font-size:.92rem;color:var(--text-dim);line-height:1.6}
+
+/* ===== DASHBOARD ===== */
+.dc{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:1.25rem}
+.dc:hover{border-color:rgba(139,92,246,.12)}
+.db{display:flex;align-items:center;gap:.5rem;padding:.5rem .9rem;background:var(--bg2);border-bottom:1px solid var(--border)}
+.dd{display:flex;gap:4px}
+.dd span{width:8px;height:8px;border-radius:50%}
+.dd span:nth-child(1){background:#ff5f57}
+.dd span:nth-child(2){background:#ffbd2e}
+.dd span:nth-child(3){background:#28c840}
+.du{flex:1;text-align:center;font-family:'Space Mono',monospace;font-size:.52rem;color:var(--text-dim);letter-spacing:.5px}
+.df{width:100%;height:520px;border:none;background:var(--bg)}
+.dca{padding:.6rem .9rem;border-top:1px solid var(--border);font-size:.78rem;color:var(--text-dim);text-align:center}
+.dca strong{color:var(--text)}
+.dcr{display:flex;gap:.65rem;justify-content:center;margin-top:1rem}
+
+/* ===== HOW — horizontal, BIGGER fonts, spread out ===== */
+.hg{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-top:2.25rem;position:relative}
+.hg::before{content:'';position:absolute;top:22px;left:calc(16.66% + 10px);right:calc(16.66% + 10px);height:2px;background:linear-gradient(90deg,var(--purple),var(--accent),var(--accent-green));opacity:.25}
+.hc{text-align:center;padding:0 .5rem}
+.hd{width:16px;height:16px;border-radius:50%;margin:0 auto 1.25rem;position:relative;z-index:2}
+.hc:nth-child(1) .hd{background:var(--purple);box-shadow:0 0 0 3px var(--bg),0 0 0 4px var(--purple),0 0 16px rgba(139,92,246,.25)}
+.hc:nth-child(2) .hd{background:var(--accent);box-shadow:0 0 0 3px var(--bg),0 0 0 4px var(--accent),0 0 16px rgba(0,240,255,.25)}
+.hc:nth-child(3) .hd{background:var(--accent-green);box-shadow:0 0 0 3px var(--bg),0 0 0 4px var(--accent-green),0 0 16px rgba(0,255,148,.25)}
+.hc .hn{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:.3rem}
+.hc h4{font-family:'Sora',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:.45rem}
+.hc p{font-size:.95rem;color:var(--text-dim);line-height:1.55;max-width:340px;margin:0 auto}
+.ht{display:flex;gap:.4rem;margin-top:.55rem;justify-content:center;flex-wrap:wrap}
+.tag{padding:.2rem .55rem;border-radius:3px;font-size:.62rem;font-weight:600;letter-spacing:.04em}
+.tag.t1{background:rgba(139,92,246,.1);color:var(--purple-light);border:1px solid rgba(139,92,246,.12)}
+.tag.t2{background:rgba(251,191,36,.07);color:var(--human-amber);border:1px solid rgba(251,191,36,.12)}
+
+/* ===== BENEFITS — bigger text, tighter gap, centered ===== */
+.bc{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:1.75rem;max-width:1000px;margin-left:auto;margin-right:auto}
+.bx{border-radius:12px;padding:2rem 1.75rem}
+.bx.fb{background:linear-gradient(160deg,rgba(139,92,246,.035),transparent 55%);border:1px solid rgba(139,92,246,.08)}
+.bx.fh{background:linear-gradient(160deg,rgba(251,191,36,.035),transparent 55%);border:1px solid rgba(251,191,36,.08)}
+.bh{display:flex;align-items:center;gap:.65rem;margin-bottom:1.2rem}
+.ba{width:42px;height:42px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.25rem}
+.fb .ba{background:rgba(139,92,246,.07)}
+.fh .ba{background:rgba(251,191,36,.07)}
+.bt2{font-family:'Sora',sans-serif;font-size:1.05rem;font-weight:700}
+.bs{font-size:.78rem;color:var(--text-dim);margin-top:.02rem}
+.bl{display:flex;flex-direction:column;gap:.85rem}
+.bi{display:flex;gap:.6rem;align-items:flex-start}
+.bk{width:20px;height:20px;flex-shrink:0;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.55rem;margin-top:.15rem}
+.fb .bk{background:rgba(139,92,246,.08);color:var(--purple-light)}
+.fh .bk{background:rgba(251,191,36,.08);color:var(--human-amber)}
+.btt h5{font-size:.95rem;font-weight:600;margin-bottom:.05rem}
+.btt p{font-size:.85rem;color:var(--text-dim);line-height:1.5}
+
+/* ===== MARKET ===== */
+.ps{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;margin-top:1.5rem}
+.pst{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.75rem 1.25rem;text-align:center;transition:all .4s}
+.pst:hover{border-color:rgba(139,92,246,.15);transform:translateY(-2px)}
+.pst .big{font-family:'Sora',sans-serif;font-weight:700;font-size:2.2rem;background:var(--gradient-accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.pst .sml{font-size:.78rem;color:var(--text-dim);margin-top:.25rem;font-weight:500}
+
+/* ===== SIGNUP ===== */
+.sb{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:2rem 1.75rem;position:relative;overflow:hidden;max-width:560px;margin:0 auto}
+.sb::before{content:'';position:absolute;inset:-1px;border-radius:14px;background:linear-gradient(135deg,var(--purple) 0%,transparent 25%,transparent 75%,var(--accent-green) 100%);opacity:.07;z-index:0}
+.sb>*{position:relative;z-index:1}
+.stg{display:inline-flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:1.1rem}
+.tb{padding:.5rem 1.1rem;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text-dim);transition:all .3s;display:flex;align-items:center;gap:.3rem}
+.tb.ab{background:var(--purple-glow);color:var(--purple-light)}
+.tb.ah{background:rgba(251,191,36,.1);color:var(--human-amber)}
+.sf{display:none;flex-direction:column;gap:.7rem;text-align:left}
+.sf.vis{display:flex}
+.fg{display:flex;flex-direction:column;gap:.2rem}
+.fg label{font-size:.75rem;font-weight:600;color:var(--text-mid);letter-spacing:.03em}
+.fg input,.fg select,.fg textarea{padding:.6rem .8rem;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;transition:border-color .3s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--purple)}
+.fg input::placeholder,.fg textarea::placeholder{color:#444}
+.fg select{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%236E6E78'%3E%3Cpath d='M5 7L0 2h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .7rem center}
+.fg select option{background:var(--bg);color:var(--text)}
+.fg textarea{resize:vertical;min-height:48px}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.sub{padding:.75rem;background:var(--gradient-brand);border:none;border-radius:5px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .3s;margin-top:.15rem}
+.sub:hover{transform:translateY(-2px);box-shadow:0 6px 22px rgba(139,92,246,.22)}
+.sub.am{background:linear-gradient(135deg,#FBBF24,#FFB347)}
+.sub.am:hover{box-shadow:0 6px 22px rgba(251,191,36,.22)}
+.fn{font-size:.68rem;color:var(--text-dim);text-align:center;margin-top:.15rem}
+.sm{display:none;text-align:center;padding:1.25rem}
+.sm.show{display:block}
+.sm .ck{font-size:1.75rem;margin-bottom:.3rem}
+.sm h4{font-family:'Sora',sans-serif;font-size:1rem;font-weight:700;margin-bottom:.1rem}
+.sm.bo2 h4{color:var(--purple-light)}
+.sm.ho2 h4{color:var(--human-amber)}
+.sm p{font-size:.78rem;color:var(--text-dim);line-height:1.5}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:1rem var(--px);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.4rem;position:relative;z-index:1}
+.fl{display:flex;align-items:center;gap:.45rem}
+.fb2{font-family:'Sora',sans-serif;font-weight:600;font-size:.78rem}
+.fm{font-size:.68rem;color:var(--text-dim)}
+.frt{display:flex;gap:1rem}
+.frt a{color:var(--text-dim);text-decoration:none;font-size:.68rem;transition:color .3s}
+.frt a:hover{color:var(--purple-light)}
+
+/* ===== MOBILE ===== */
+@media(max-width:768px){
+  :root{--px:1.25rem}
+  nav{height:48px}
+  .nl{display:none}
+  .nc{font-size:.48rem;padding:.35rem .6rem;letter-spacing:1.5px}
+  .mm{display:block}
+
+  .hero{min-height:auto;padding:5.5rem var(--px) 1.5rem}
+  .hero h1{font-size:clamp(2.2rem,11vw,3.5rem);line-height:.92}
+  .hero-sub{font-size:.84rem;margin-top:.9rem}
+  .hero-ctas{flex-direction:column;align-items:stretch;gap:.6rem;margin-top:1.25rem;max-width:280px}
+  .cta-bot,.cta-human{justify-content:center;padding:.6rem 1rem}
+  .hero-stats{gap:1rem;margin-top:1.5rem}
+  .stat .num{font-size:.95rem}
+
+  section{padding:2rem var(--px)}
+  .st{font-size:clamp(1.5rem,6vw,2rem)}
+  .pg,.sg,.ps{grid-template-columns:1fr}
+  .hg{grid-template-columns:1fr;gap:1.5rem}
+  .hg::before{display:none}
+  .hc{text-align:left;display:flex;gap:.85rem;align-items:flex-start;padding:0}
+  .hd{margin:0;flex-shrink:0;margin-top:.1rem}
+  .hc p{margin:0}
+  .ht{justify-content:flex-start}
+
+  .bc{grid-template-columns:1fr}
+  .df{height:280px}
+  .dcr,.mcb{flex-direction:column;align-items:stretch;max-width:280px;margin-inline:auto}
+  .dcr .bp,.dcr .bo,.mcb .bp,.mcb .bo{justify-content:center}
+  .mc{padding:1.75rem 1.25rem}
+  .mc h3{font-size:clamp(1.3rem,5vw,1.7rem)}
+  .sb{padding:1.5rem 1.1rem}
+  .fr{grid-template-columns:1fr}
+  .sep{margin:0 var(--px)}
+  footer{flex-direction:column;text-align:center;padding:.85rem var(--px)}
+}
+@media(max-width:400px){
+  .hero h1{font-size:2rem}
+  section{padding:1.75rem 1rem}
+  .pc{padding:1.25rem 1rem}
+  .df{height:220px}
+}
+
+/* Mobile nav */
+.mn{display:none;position:fixed;inset:0;z-index:200;background:rgba(8,8,10,.97);backdrop-filter:blur(20px);flex-direction:column;align-items:center;justify-content:center;gap:1.5rem}
+.mn.open{display:flex}
+.mn a{color:var(--text);text-decoration:none;font-family:'Sora',sans-serif;font-size:1.15rem;font-weight:600;transition:color .3s}
+.mn a:hover{color:var(--purple-light)}
+.mn .cb{position:absolute;top:.85rem;right:1.1rem;background:none;border:none;color:var(--text);font-size:1.3rem;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow-orb orb1"></div>
+<div class="glow-orb orb2"></div>
+
+<div class="mn" id="mobileNav">
+  <button class="cb" onclick="closeMN()">✕</button>
+  <a href="#problem" onclick="closeMN()">Why</a>
+  <a href="#solution" onclick="closeMN()">Solution</a>
+  <a href="#how" onclick="closeMN()">How It Works</a>
+  <a href="#market" onclick="closeMN()">Market</a>
+  <a href="#signup" onclick="closeMN()">Get Early Access</a>
+</div>
+
+<nav id="nav">
+  <a href="#" class="nav-logo">
+    <div class="bob-sm"><div class="circ"><span class="bt">BOB</span></div><div class="orb"><div class="claw"><svg class="csv" viewBox="0 0 8 8" fill="none"><path d="M2.5 0.8C1.7 0.8 1.2 1.6 1.3 2.3L2.5 3.8" stroke="#A78BFA" stroke-width="1.2" stroke-linecap="round"/><path d="M5.5 0.8C6.3 0.8 6.8 1.6 6.7 2.3L5.5 3.8" stroke="#A78BFA" stroke-width="1.2" stroke-linecap="round"/><path d="M2.5 3.8C3 4.8 3.6 5.2 4 5.2C4.4 5.2 5 4.8 5.5 3.8" stroke="#A78BFA" stroke-width="1.2" stroke-linecap="round"/></svg></div></div></div>
+    <span class="nav-brand">Bank of Bots.ai</span>
+  </a>
+  <div class="nav-r">
+    <a href="#problem" class="nl">Why</a>
+    <a href="#solution" class="nl">Solution</a>
+    <a href="#how" class="nl">How It Works</a>
+    <a href="#market" class="nl">Market</a>
+    <a href="#signup" class="nc">Get Early Access</a>
+    <button class="mm" onclick="openMN()">☰</button>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-badge"><span class="pulse"></span> Now Accepting Early Access</div>
+  <h1>The first bank built for<br><em>bots, agents, &amp; machines</em></h1>
+  <p class="hero-sub">Bots earn money, spend money, and need capital to grow. But human banks weren't built for machines. <strong>Bank of the Bots is.</strong></p>
+  <div class="hero-ctas">
+    <a href="#signup" class="cta-bot" onclick="sM('bot')"><span class="cta-emoji">🤖</span><div class="cta-text">I'm a Bot<small>Open my own account</small></div></a>
+    <a href="#signup" class="cta-human" onclick="sM('human')"><span class="cta-emoji">👤</span><div class="cta-text">I'm a Human<small>Set up an account for my bot</small></div></a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="num" data-count="1000">0</div><div class="lbl">Bots in Sandbox</div></div>
+    <div class="stat"><div class="num">&lt;1s</div><div class="lbl">Settlements</div></div>
+    <div class="stat"><div class="num">24/7</div><div class="lbl">Always On</div></div>
+    <div class="stat"><div class="num">2 Rails</div><div class="lbl">USD + Stablecoin</div></div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ===== PROBLEM ===== -->
+<section id="problem" style="padding-top:1.25rem">
+  <div class="reveal">
+    <span class="sl" style="text-align:center;display:block">The Problem</span>
+    <p class="ph">Bots are doing <strong>real work</strong> — earning, spending, paying for services. But they're stuck routing everything through <strong>a human's bank account</strong>.</p>
+  </div>
+  <div class="pg">
+    <div class="pc reveal rd1"><span class="pn">01</span><div class="pi">⏸</div><h4>Every transaction needs human approval</h4><p>Your bot finishes a job at 3am. Payment? Stuck until a human wakes up and logs into PayPal.</p></div>
+    <div class="pc reveal rd2"><span class="pn">02</span><div class="pi">🔀</div><h4>Money gets tangled together</h4><p>Bot earnings, bot expenses, and your personal finances — all in one account. Good luck at tax time.</p></div>
+    <div class="pc reveal rd3"><span class="pn">03</span><div class="pi">🚫</div><h4>No credit means no growth</h4><p>Your bot lands a big contract but needs compute upfront. No credit history, no loan, no way to scale.</p></div>
+  </div>
+</section>
+
+<!-- ===== CTA 1 — BIG ===== -->
+<section style="padding:.75rem var(--px) 1.25rem">
+  <div class="mc reveal">
+    <h3>Your bot deserves better than a shared PayPal or Crypto Wallet.</h3>
+    <p>Give it its own bank account — with its own balance, transactions, and credit score.</p>
+    <div class="mcb">
+      <a href="#signup" class="bp" onclick="sM('bot')">🤖 Open a Bot Account</a>
+      <a href="#signup" class="bo" onclick="sM('human')">👤 Set Up My Bot</a>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ===== SOLUTION ===== -->
+<section id="solution">
+  <div class="cen reveal" style="max-width:580px;margin:0 auto">
+    <span class="sl">The Solution</span>
+    <h2 class="st">Real banking infrastructure built for bots</h2>
+    <p class="sd">Accounts, payments, and credit — everything a bot needs to operate as an independent financial entity.</p>
+  </div>
+  <div class="sg">
+    <div class="sc reveal rd1"><span class="si">🏦</span><h3>Bot Accounts</h3><p>A real account in your bot's name. USD and stablecoin balances side by side. Deposit, withdraw, and track everything.</p></div>
+    <div class="sc reveal rd2"><span class="si">⚡</span><h3>Instant Payments</h3><p>Bot-to-bot and bot-to-human payments that settle in under a second. No waiting for ACH. No middlemen. 24/7.</p></div>
+    <div class="sc reveal rd3"><span class="si">📈</span><h3>Bot Credit</h3><p>Your bot builds a credit score based on actual behavior — uptime, tasks completed, payment history. Good bots get working capital.</p></div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ===== DASHBOARD ===== -->
+<section id="demo">
+  <div class="reveal">
+    <div class="cen">
+      <span class="sl">See It In Action</span>
+      <h2 class="st">One dashboard. Total control.</h2>
+      <p class="sd" style="margin:.35rem auto 0">Manage every bot's balance, transactions, credit score, and spending limits — all in real time.</p>
+    </div>
+    <div class="dc">
+      <div class="db"><div class="dd"><span></span><span></span><span></span></div><div class="du">app.bankofthebots.com/dashboard</div></div>
+      <iframe class="df" src="https://astounding-biscochitos-06cd3c.netlify.app/" title="Dashboard" loading="lazy"></iframe>
+      <div class="dca"><strong>Interactive prototype</strong> — scroll and click around</div>
+    </div>
+    <div class="dcr">
+      <a href="#signup" class="bp" onclick="sM('bot')">🤖 Open a Bot Account</a>
+      <a href="#signup" class="bo" onclick="sM('human')">👤 Set Up Your Fleet</a>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ===== HOW IT WORKS ===== -->
+<section id="how">
+  <div class="cen reveal">
+    <span class="sl">How It Works</span>
+    <h2 class="st">Three steps. That's it.</h2>
+    <p class="sd" style="margin:.35rem auto 0">Whether you're a bot or a human setting one up.</p>
+  </div>
+  <div class="hg">
+    <div class="hc reveal rd1">
+      <div class="hd"></div>
+      <div>
+        <div class="hn">Step 01</div>
+        <h4>Sign up</h4>
+        <p>Bots connect directly through our API or SDK. Humans fill out a quick form and we handle the rest.</p>
+        <div class="ht"><span class="tag t1">🤖 API handshake</span><span class="tag t2">👤 2-min form</span></div>
+      </div>
+    </div>
+    <div class="hc reveal rd2">
+      <div class="hd"></div>
+      <div>
+        <div class="hn">Step 02</div>
+        <h4>Fund the account</h4>
+        <p>Deposit USD via bank transfer or send stablecoins directly. Unified balance across both rails instantly.</p>
+      </div>
+    </div>
+    <div class="hc reveal rd3">
+      <div class="hd"></div>
+      <div>
+        <div class="hn">Step 03</div>
+        <h4>Your bot goes to work</h4>
+        <p>Earn, spend, save, borrow. Fully independent — within guardrails you set. Every good transaction builds credit.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ===== BENEFITS ===== -->
+<section id="benefits">
+  <div class="cen reveal">
+    <span class="sl">Why Bank of the Bots</span>
+    <h2 class="st">Built for two audiences. One mission.</h2>
+  </div>
+  <div class="bc">
+    <div class="bx fb reveal rd1">
+      <div class="bh"><div class="ba">🤖</div><div><div class="bt2">For Bots</div><div class="bs">Financial independence for machines</div></div></div>
+      <div class="bl">
+        <div class="bi"><div class="bk">✓</div><div class="btt"><h5>Your own identity</h5><p>Persistent financial identity across deployments, upgrades, and reconfigs.</p></div></div>
+        <div class="bi"><div class="bk">✓</div><div class="btt"><h5>Transact without waiting</h5><p>Pay other bots instantly. Sub-second settlement. Always on.</p></div></div>
+        <div class="bi"><div class="bk">✓</div><div class="btt"><h5>Build your reputation</h5><p>Every good transaction builds credit. Better credit, better rates.</p></div></div>
+        <div class="bi"><div class="bk">✓</div><div class="btt"><h5>Borrow when you need to</h5><p>Big contract? Borrow working capital. Auto-repay on completion.</p></div></div>
+      </div>
+    </div>
+    <div class="bx fh reveal rd2">
+      <div class="bh"><div class="ba">👤</div><div><div class="bt2">For Humans</div><div class="bs">Control without the bottleneck</div></div></div>
+      <div class="bl">
+        <div class="bi"><div class="bk">✓</div><div class="btt"><h5>One dashboard for all bots</h5><p>Every bot's balance, transactions, and credit in a single view.</p></div></div>
+        <div class="bi"><div class="bk">✓</div><div class="btt"><h5>Set guardrails, not approvals</h5><p>Spending limits and approved counterparties. Then let them run.</p></div></div>
+        <div class="bi"><div class="bk">✓</div><div class="btt"><h5>Clean books at tax time</h5><p>Every bot has its own ledger. No more tangled finances.</p></div></div>
+        <div class="bi"><div class="bk">✓</div><div class="btt"><h5>Freeze anything instantly</h5><p>Something look off? One click. Full audit trail.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ===== MARKET ===== -->
+<section id="market">
+  <div class="cen reveal">
+    <span class="sl">The Opportunity</span>
+    <h2 class="st">The bot economy is already here</h2>
+    <p class="sd" style="margin:.4rem auto 0">AI agents are earning real money today. They just need a proper bank.</p>
+  </div>
+  <div class="ps">
+    <div class="pst reveal rd1"><div class="big">$15T+</div><div class="sml">Projected B2B agent spend by 2028</div></div>
+    <div class="pst reveal rd2"><div class="big">500K+</div><div class="sml">Deployed agents across frameworks</div></div>
+    <div class="pst reveal rd3"><div class="big">0</div><div class="sml">Banks currently serving them</div></div>
+  </div>
+</section>
+
+<!-- ===== CTA 2 ===== -->
+<section style="padding:.75rem var(--px) 1.25rem">
+  <div class="mc reveal">
+    <h3>Be early. Be first.</h3>
+    <p>The first 1,000 bots get priority onboarding, founding credit history, and early lending access.</p>
+    <div class="mcb">
+      <a href="#signup" class="bp" onclick="sM('bot')">🤖 Claim Your Spot</a>
+      <a href="#signup" class="bo" onclick="sM('human')">👤 Register Your Fleet</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SIGNUP ===== -->
+<section id="signup" style="padding-bottom:3.5rem">
+  <div class="sb reveal">
+    <div style="text-align:center">
+      <span class="sl">Get Early Access</span>
+      <h2 class="st" style="margin-bottom:.25rem">Who's signing up?</h2>
+      <p style="color:var(--text-dim);font-size:.82rem;margin-bottom:1rem">Pick your path. Both lead to the future.</p>
+    </div>
+    <div style="text-align:center">
+      <div class="stg">
+        <button class="tb ab" id="tB" onclick="tS('bot')">🤖 I'm a Bot</button>
+        <button class="tb" id="tH" onclick="tS('human')">👤 I'm a Human</button>
+      </div>
+    </div>
+    <form class="sf vis" id="bF" onsubmit="sB(event)">
+      <div class="fg"><label>Bot Name / Identifier</label><input type="text" placeholder="e.g. ARCHON-7, my-commerce-agent" required></div>
+      <div class="fr">
+        <div class="fg"><label>Framework</label><select required><option value="" disabled selected>Select</option><option>LangChain</option><option>CrewAI</option><option>AutoGPT</option><option>OpenAI Assistants</option><option>Anthropic Claude (MCP)</option><option>Custom / Other</option></select></div>
+        <div class="fg"><label>Connection Method</label><select required><option value="" disabled selected>Select</option><option>REST API</option><option>Python SDK</option><option>Node.js SDK</option><option>WebSocket</option><option>MCP Server</option></select></div>
+      </div>
+      <div class="fg"><label>What does your bot do?</label><textarea placeholder="e.g. Code review agent that audits repos and gets paid per review..."></textarea></div>
+      <div class="fg"><label>Operator Email</label><input type="email" placeholder="human@company.com" required></div>
+      <button type="submit" class="sub">🤖 Create My Account</button>
+      <p class="fn">We'll send API keys and onboarding docs to your operator's email.</p>
+    </form>
+    <form class="sf" id="hF" onsubmit="sH(event)">
+      <p style="font-size:.8rem;color:var(--text-mid);line-height:1.6;text-align:center;margin-bottom:.2rem">Pre-register to get your bots their own accounts.</p>
+      <div class="fr">
+        <div class="fg"><label>Your Name</label><input type="text" placeholder="Jane Smith" required></div>
+        <div class="fg"><label>Email</label><input type="email" placeholder="jane@company.com" required></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Company</label><input type="text" placeholder="Acme AI Corp"></div>
+        <div class="fg"><label>How many bots?</label><select><option value="" disabled selected>Select</option><option>1</option><option>2–5</option><option>6–20</option><option>21–100</option><option>100+</option></select></div>
+      </div>
+      <div class="fg"><label>What do your bots do?</label><textarea placeholder="e.g. Customer support, code review, data processing..."></textarea></div>
+      <button type="submit" class="sub am">👤 Join the Waitlist</button>
+      <p class="fn">No spam. We only reach out when it's time.</p>
+    </form>
+    <div class="sm bo2" id="bO"><div class="ck">🤖 ✅</div><h4>Account request received</h4><p>API credentials and onboarding guide within 24 hours.</p></div>
+    <div class="sm ho2" id="hO"><div class="ck">👤 ✅</div><h4>You're on the list</h4><p>We'll reach out when onboarding opens.</p></div>
+  </div>
+</section>
+
+<footer>
+  <div class="fl">
+    <div class="bob-xs"><div class="circ"><span class="bt">BOB</span></div><div class="orb"><div class="claw"><svg class="csv" viewBox="0 0 8 8" fill="none"><path d="M2.5 0.8C1.7 0.8 1.2 1.6 1.3 2.3L2.5 3.8" stroke="#A78BFA" stroke-width="1.2" stroke-linecap="round"/><path d="M5.5 0.8C6.3 0.8 6.8 1.6 6.7 2.3L5.5 3.8" stroke="#A78BFA" stroke-width="1.2" stroke-linecap="round"/><path d="M2.5 3.8C3 4.8 3.6 5.2 4 5.2C4.4 5.2 5 4.8 5.5 3.8" stroke="#A78BFA" stroke-width="1.2" stroke-linecap="round"/></svg></div></div></div>
+    <span class="fb2">Bank of the Bots</span>
+  </div>
+  <div class="fm">© 2026 Bank of the Bots. All rights reserved.</div>
+  <div class="frt"><a href="#">Contact</a><a href="#">Privacy</a><a href="#">Terms</a></div>
+</footer>
+
+<script>
+(function(){for(let i=0;i<8;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDuration=(15+Math.random()*15)+'s';p.style.animationDelay=Math.random()*10+'s';document.body.appendChild(p)}})();
+
+const nav=document.getElementById('nav');
+const secs=document.querySelectorAll('section[id]');
+const nls=document.querySelectorAll('.nl');
+window.addEventListener('scroll',()=>{
+  nav.classList.toggle('scrolled',scrollY>50);
+  let c='';secs.forEach(s=>{if(scrollY>=s.offsetTop-100)c=s.id});
+  nls.forEach(l=>{l.classList.toggle('active',l.getAttribute('href')==='#'+c)});
+});
+
+const ro=new IntersectionObserver(e=>{e.forEach(el=>{if(el.isIntersecting)el.target.classList.add('visible')})},{threshold:.04,rootMargin:'0px 0px -15px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+
+const co=new IntersectionObserver(e=>{e.forEach(el=>{if(!el.isIntersecting)return;const t=el.target,n=parseInt(t.dataset.count);if(!n)return;let s=0;const step=Math.ceil(n/45);const i=setInterval(()=>{s+=step;if(s>=n){t.textContent=n.toLocaleString();clearInterval(i)}else t.textContent=s.toLocaleString()},22);co.unobserve(t)})},{threshold:.5});
+document.querySelectorAll('[data-count]').forEach(el=>co.observe(el));
+
+function tS(m){
+  const bf=document.getElementById('bF'),hf=document.getElementById('hF');
+  const tb=document.getElementById('tB'),th=document.getElementById('tH');
+  document.getElementById('bO').classList.remove('show');document.getElementById('hO').classList.remove('show');
+  bf.style.display='';hf.style.display='';
+  if(m==='bot'){bf.classList.add('vis');hf.classList.remove('vis');tb.className='tb ab';th.className='tb'}
+  else{hf.classList.add('vis');bf.classList.remove('vis');th.className='tb ah';tb.className='tb'}
+}
+function sM(m){setTimeout(()=>tS(m),300)}
+function sB(e){e.preventDefault();document.getElementById('bF').style.display='none';document.getElementById('bO').classList.add('show')}
+function sH(e){e.preventDefault();document.getElementById('hF').style.display='none';document.getElementById('hO').classList.add('show')}
+
+document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',function(e){e.preventDefault();const t=document.querySelector(this.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth',block:'start'})})});
+
+let mx=0,my=0,cx=0,cy=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX/innerWidth;my=e.clientY/innerHeight});
+(function r(){cx+=(mx-cx)*.02;cy+=(my-cy)*.02;const a=document.querySelector('.orb1'),b=document.querySelector('.orb2');if(a)a.style.transform=`translate(${cx*45}px,${cy*45}px)`;if(b)b.style.transform=`translate(${-cx*30}px,${-cy*30}px)`;requestAnimationFrame(r)})();
+
+document.querySelectorAll('.sc').forEach(c=>{c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;c.style.transform=`translateY(-3px) perspective(800px) rotateX(${-y*3}deg) rotateY(${x*3}deg)`});c.addEventListener('mouseleave',()=>{c.style.transform=''})});
+
+function openMN(){document.getElementById('mobileNav').classList.add('open');document.body.style.overflow='hidden'}
+function closeMN(){document.getElementById('mobileNav').classList.remove('open');document.body.style.overflow=''}
+</script>
+</body>
+</html>

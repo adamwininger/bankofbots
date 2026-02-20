@@ -42,11 +42,14 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,-apple
 @keyframes os{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 
 /* HERO BOB LOGO */
-.bob-hero{width:80px;height:80px;position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;animation:fu .8s ease both}
-.bob-hero .circ{width:52px;height:52px;background:var(--text);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;position:relative}
-.bob-hero .bt{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--bg);letter-spacing:-.5px}
-.bob-hero .orb{position:absolute;width:80px;height:80px;border:2px solid rgba(15,23,42,.1);border-radius:50%;animation:os 15s linear infinite;z-index:3}
-.bob-hero .dot{position:absolute;top:-5px;left:50%;transform:translateX(-50%);width:9px;height:9px;background:var(--accent);border-radius:50%;box-shadow:0 0 12px rgba(109,92,231,.4)}
+.hero-title-row{display:flex;align-items:center;gap:1.5rem;width:100%;justify-content:center;flex-wrap:nowrap}
+.hero-title-row h1{text-align:left}
+.bob-hero{width:88px;height:88px;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:fu .8s ease both}
+.bob-hero .circ{width:56px;height:56px;background:var(--text);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;position:relative}
+.bob-hero .bt{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--bg);letter-spacing:-.5px}
+.bob-hero .orb{position:absolute;width:88px;height:88px;border:2px solid rgba(15,23,42,.12);border-radius:50%;animation:os 12s linear infinite;z-index:3}
+.bob-hero .orb-claw{position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:0;line-height:1;filter:drop-shadow(0 0 8px rgba(109,92,231,.5))}
+.bob-hero .orb-claw::before{content:'';display:block;width:16px;height:16px;background:var(--accent);mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9.5 2C7.6 2 6 3.6 6 5.5c0 .7.2 1.3.5 1.8L3 13l3.5 3.5L9 14l1-1h4l1 1 2.5 2.5L21 13l-3.5-5.7c.3-.5.5-1.1.5-1.8C18 3.6 16.4 2 14.5 2 13.1 2 11.9 2.8 11.5 4c-.4-1.2-1.6-2-3-2zm0 2c.8 0 1.5.7 1.5 1.5S10.3 7 9.5 7 8 6.3 8 5.5 8.7 4 9.5 4zm5 0c.8 0 1.5.7 1.5 1.5S15.3 7 14.5 7 13 6.3 13 5.5 13.7 4 14.5 4z'/%3E%3C/svg%3E");mask-size:contain;mask-repeat:no-repeat;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9.5 2C7.6 2 6 3.6 6 5.5c0 .7.2 1.3.5 1.8L3 13l3.5 3.5L9 14l1-1h4l1 1 2.5 2.5L21 13l-3.5-5.7c.3-.5.5-1.1.5-1.8C18 3.6 16.4 2 14.5 2 13.1 2 11.9 2.8 11.5 4c-.4-1.2-1.6-2-3-2zm0 2c.8 0 1.5.7 1.5 1.5S10.3 7 9.5 7 8 6.3 8 5.5 8.7 4 9.5 4zm5 0c.8 0 1.5.7 1.5 1.5S15.3 7 14.5 7 13 6.3 13 5.5 13.7 4 14.5 4z'/%3E%3C/svg%3E");-webkit-mask-size:contain;-webkit-mask-repeat:no-repeat}
 
 /* ===== NAV ===== */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 var(--px);height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(250,250,248,.85);backdrop-filter:blur(24px) saturate(1.3);border-bottom:1px solid transparent;transition:all .4s}
@@ -73,7 +76,7 @@ nav.scrolled{border-bottom-color:var(--border);box-shadow:0 1px 8px rgba(15,23,4
 .particle{position:absolute;border-radius:50%;z-index:1;opacity:0;animation:particleFloat linear infinite}
 @keyframes particleFloat{0%{opacity:0;transform:translateY(100vh)}10%{opacity:1}90%{opacity:1}100%{opacity:0;transform:translateY(-10vh)}}
 
-.hero-content{position:relative;z-index:2;max-width:900px}
+.hero-content{position:relative;z-index:2;max-width:1000px}
 .hero-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:100px;font-size:.8rem;font-weight:500;color:var(--text-secondary);margin-bottom:2.5rem;animation:fu .8s ease both;box-shadow:var(--shadow-sm)}
 .hero-badge .pulse{width:7px;height:7px;border-radius:50%;background:var(--teal);flex-shrink:0;animation:pd 2s ease infinite}
 @keyframes pd{0%,100%{box-shadow:0 0 0 0 rgba(13,148,136,.3)}50%{box-shadow:0 0 0 6px rgba(13,148,136,0)}}
@@ -143,7 +146,7 @@ section{position:relative;padding:6rem var(--px)}
 
 /* ===== FEATURES ===== */
 .features-section{background:var(--bg-warm)}
-.features-header{text-align:center;max-width:750px;margin:0 auto 3.5rem}
+.features-header{text-align:center;max-width:850px;margin:0 auto 3.5rem}
 .features-header .section-desc{max-width:580px;margin:.5rem auto 0}
 .feature-row{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;background:var(--surface);margin-bottom:1.5rem}
 .feature-row:last-child{margin-bottom:0}
@@ -259,10 +262,10 @@ section{position:relative;padding:6rem var(--px)}
 
 /* Horizontal benefit header: icon + large label side by side */
 .benefit-top{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem}
-.benefit-top .benefit-icon{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
+.benefit-top .benefit-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.35rem;flex-shrink:0}
 .benefit-box.for-bots .benefit-top .benefit-icon{background:var(--accent-pale)}
 .benefit-box.for-humans .benefit-top .benefit-icon{background:rgba(217,119,6,.06)}
-.benefit-top .benefit-tag{font-size:clamp(1.4rem,2vw,1.8rem);font-weight:800;letter-spacing:.1em;text-transform:uppercase;display:block;line-height:1.1}
+.benefit-top .benefit-tag{font-size:clamp(1rem,1.4vw,1.3rem);font-weight:800;letter-spacing:.1em;text-transform:uppercase;display:block;line-height:1.1}
 .benefit-box.for-bots .benefit-top .benefit-tag{color:var(--accent)}
 .benefit-box.for-humans .benefit-top .benefit-tag{color:var(--warm)}
 
@@ -361,10 +364,12 @@ footer{border-top:1px solid var(--border);padding:1.5rem var(--px);display:flex;
   .cta-primary,.cta-secondary{justify-content:center}
   .hero-proof{flex-direction:column;gap:.6rem;margin-top:2rem}
   .mesh-grad.g1{width:300px;height:300px}.mesh-grad.g2{width:250px;height:250px}.mesh-grad.g3{width:200px;height:200px}
-  .bob-hero{width:60px;height:60px}
-  .bob-hero .circ{width:40px;height:40px}
+  .hero-title-row{gap:1rem}
+  .bob-hero{width:64px;height:64px}
+  .bob-hero .circ{width:42px;height:42px}
   .bob-hero .bt{font-size:11px}
-  .bob-hero .orb{width:60px;height:60px}
+  .bob-hero .orb{width:64px;height:64px}
+  .bob-hero .orb-claw::before{width:13px;height:13px}
   .ticker-track{gap:2rem}
   section{padding:3.5rem var(--px)}
   .section-title{font-size:clamp(2rem,7vw,2.8rem)}
@@ -389,6 +394,12 @@ footer{border-top:1px solid var(--border);padding:1.5rem var(--px);display:flex;
   :root{--px:1rem}
   .hero{padding:5rem var(--px) 2.5rem}
   .hero h1{font-size:clamp(2rem,8.5vw,2.8rem)}
+  .hero-title-row{gap:.75rem}
+  .bob-hero{width:50px;height:50px}
+  .bob-hero .circ{width:34px;height:34px}
+  .bob-hero .bt{font-size:9px}
+  .bob-hero .orb{width:50px;height:50px}
+  .bob-hero .orb-claw::before{width:11px;height:11px}
   section{padding:3rem var(--px)}
   .dash-iframe{height:260px}
 }
@@ -431,12 +442,14 @@ footer{border-top:1px solid var(--border);padding:1.5rem var(--px);display:flex;
     <div class="mesh-grad g3"></div>
   </div>
   <div class="hero-content">
-    <div class="bob-hero">
-      <div class="circ"><span class="bt">BOB</span></div>
-      <div class="orb"><div class="dot"></div></div>
-    </div>
     <div class="hero-badge"><span class="pulse"></span> Now accepting early access applications</div>
-    <h1>The first bank built for<br><span class="hl">bots, agents, & machines</span></h1>
+    <div class="hero-title-row">
+      <div class="bob-hero">
+        <div class="circ"><span class="bt">BOB</span></div>
+        <div class="orb"><div class="orb-claw"></div></div>
+      </div>
+      <h1>The first bank built for<br><span class="hl">bots, agents, & machines</span></h1>
+    </div>
     <p class="hero-sub">AI agents earn, spend, and need capital — but today's human banks aren't designed for them. Bank of Bots is their bank.</p>
     <div class="hero-ctas">
       <a href="#signup" class="cta-primary" onclick="sM('bot')"><span class="cta-icon">→</span> Open a Bot Account</a>
@@ -458,7 +471,7 @@ footer{border-top:1px solid var(--border);padding:1.5rem var(--px);display:flex;
     <span class="ticker-item"><span class="ti">⚙️</span> AutoGPT</span>
     <span class="ticker-item"><span class="ti">🧠</span> OpenAI Assistants</span>
     <span class="ticker-item"><span class="ti">🔮</span> Anthropic MCP</span>
-    <span class="ticker-item"><span class="ti">🐾</span> OpenClaw Agents</span>
+    <span class="ticker-item"><span class="ti">🦞</span> OpenClaw Agents</span>
     <span class="ticker-item"><span class="ti">💰</span> DeFi Agents</span>
     <span class="ticker-item"><span class="ti">📊</span> Trading Bots</span>
     <span class="ticker-item"><span class="ti">🛠️</span> DevOps Agents</span>
@@ -470,7 +483,7 @@ footer{border-top:1px solid var(--border);padding:1.5rem var(--px);display:flex;
     <span class="ticker-item"><span class="ti">⚙️</span> AutoGPT</span>
     <span class="ticker-item"><span class="ti">🧠</span> OpenAI Assistants</span>
     <span class="ticker-item"><span class="ti">🔮</span> Anthropic MCP</span>
-    <span class="ticker-item"><span class="ti">🐾</span> OpenClaw Agents</span>
+    <span class="ticker-item"><span class="ti">🦞</span> OpenClaw Agents</span>
     <span class="ticker-item"><span class="ti">💰</span> DeFi Agents</span>
     <span class="ticker-item"><span class="ti">📊</span> Trading Bots</span>
     <span class="ticker-item"><span class="ti">🛠️</span> DevOps Agents</span>
@@ -522,7 +535,7 @@ footer{border-top:1px solid var(--border);padding:1.5rem var(--px);display:flex;
     <div class="features-header reveal">
       <span class="section-label">The Platform</span>
       <h2 class="section-title">Real banking infrastructure,<br>purpose-built for bots</h2>
-      <p class="section-desc">Accounts, payments, and credit — everything a bot needs to operate independently.</p>
+      <p class="section-desc">Accounts, payments, and credit — everything a bot needs to <span style="white-space:nowrap">operate independently.</span></p>
     </div>
 
     <!-- Feature 1: Accounts -->
